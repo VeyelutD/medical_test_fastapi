@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from datetime import datetime
 
 
 class MessageIn(BaseModel):
@@ -8,11 +7,11 @@ class MessageIn(BaseModel):
     to_user_id: int
 
 
-class MessageOut(BaseModel):
+class ID(BaseModel):
     id: str
 
 
 class Message(MessageIn):
     id: str
-    publish_timestamp: datetime
-    edit_timestamp: datetime | None = None
+    publish_timestamp: float
+    edit_timestamp: float | None = None

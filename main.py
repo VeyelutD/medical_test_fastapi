@@ -12,9 +12,9 @@ ENCODERS_BY_TYPE[ObjectId] = str
 app = FastAPI()
 
 
-@app.get("/api/messages/{id}", response_model=schema.Message)
-async def get_message(id: str):
-    message_in_db = await Message.find_by_id(id)
+@app.get("/api/messages/{message_id}", response_model=schema.Message)
+async def get_message(message_id: str):
+    message_in_db = await Message.find_by_id(message_id)
     if not message_in_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such message")
     return {**message_in_db}
@@ -25,26 +25,26 @@ async def get_messages(from_user_id: int | None = None, to_user_id: int | None =
     return await Message.find_all(from_user_id, to_user_id)
 
 
-@app.post("/api/messages", status_code=status.HTTP_201_CREATED)
+@app.post("/api/messages", response_model=schema.ID, status_code=status.HTTP_201_CREATED)
 async def create_message(message: schema.MessageIn):
     new_message = await Message.create(message)
     if not new_message:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No such message")
-    return {**new_message}
+    return {"id": new_message["id"]}
 
 
-@app.put("/api/messages/{id}")
-async def update_message(id: str, updated_message: schema.MessageIn):
-    message_in_db = await Message.find_by_id(id)
+@app.put("/api/messages/{message_id}", response_model=schema.ID)
+async def update_message(message_id: str, updated_message: schema.MessageIn):
+    message_in_db = await Message.find_by_id(message_id)
     if not message_in_db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    await Message.update(id, updated_message.model_dump())
-    return {"id": id}
+    await Message.update(message_id, updated_message.model_dump())
+    return {"id": message_id}
 
 
-@app.delete("/api/messages/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_message(id: str):
-    result = await Message.delete(id)
+@app.delete("/api/messages/{message_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_message(message_id: str):
+    result = await Message.delete(message_id)
     if not result:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
     return Response(content="Successfully deleted")
